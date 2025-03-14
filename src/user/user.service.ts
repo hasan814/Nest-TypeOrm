@@ -1,9 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Between, FindOptionsWhere, ILike, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { isEmail, isNumber } from 'class-validator';
 
 @Injectable()
 export class UserService {
@@ -67,12 +68,21 @@ export class UserService {
     return await this.userRepository.find({ where: {}, select: { first_name: true, last_name: true, age: true } })
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.userRepository.findOneBy({ id })
+    if (!user) throw new NotFoundException()
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async updateChangedFields(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.findOne(id)
+    const { age, email, first_name, last_name } = updateUserDto
+    if (age && isNumber(age)) user.age = age
+    if (email && isEmail(email)) user.email = email
+    if (first_name) user.first_name = first_name
+    if (last_name) user.last_name = last_name
+    await this.userRepository.save(user)
+    return { message: "Updated Successfully" }
   }
 
   remove(id: number) {
