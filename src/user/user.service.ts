@@ -38,6 +38,9 @@ export class UserService {
 
     return await this.userRepository.find({ where });
   }
+  async orderData() {
+    return await this.userRepository.find({ where: {}, order: { id: "ASC" } })
+  }
 
 
   findOne(id: number) {

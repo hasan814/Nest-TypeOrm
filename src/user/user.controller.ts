@@ -25,6 +25,11 @@ export class UserController {
     return this.userService.findAll(search, startDate, endDate);
   }
 
+  @Get('/order')
+  orderData() {
+    return this.userService.findAll();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
