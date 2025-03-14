@@ -85,7 +85,9 @@ export class UserService {
     return { message: "Updated Successfully" }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    const user = await this.findOne(id)
+    await this.userRepository.remove(user)
+    return { message: "Data Remove Successfully" };
   }
 }
