@@ -1,8 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("user")
 export class UserEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("increment")
   id: number;
   @Column()
   first_name: string;
@@ -13,5 +13,5 @@ export class UserEntity {
   @Column({ nullable: false })
   age: number;
   @CreateDateColumn()
-  created_at: Date;
+  created_at: Date
 }
