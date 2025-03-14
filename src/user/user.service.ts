@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { Injectable } from '@nestjs/common';
-import { MoreThan, Repository } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
@@ -29,9 +29,16 @@ export class UserService {
     })
   }
 
-  async findAll() {
-    return await this.userRepository.find({ where: { id: MoreThan(2) } });
+  async findAll(search?: string, startDate?: string, endDate?: string) {
+    let where: FindOptionsWhere<UserEntity> = {};
+    if (search) where.first_name = ILike(`%${search}%`);
+    if (startDate && endDate) where.created_at = Between(new Date(startDate), new Date(endDate));
+    else if (startDate) where.created_at = MoreThanOrEqual(new Date(startDate));
+    else if (endDate) where.created_at = LessThanOrEqual(new Date(endDate));
+
+    return await this.userRepository.find({ where });
   }
+
 
   findOne(id: number) {
     return `This action returns a #${id} user`;
