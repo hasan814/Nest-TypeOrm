@@ -63,6 +63,9 @@ export class UserService {
     };
   }
 
+  async selection() {
+    return await this.userRepository.find({ where: {}, select: { first_name: true, last_name: true, age: true } })
+  }
 
   findOne(id: number) {
     return `This action returns a #${id} user`;

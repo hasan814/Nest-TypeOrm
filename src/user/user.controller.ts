@@ -38,6 +38,11 @@ export class UserController {
     });
   }
 
+  @Get('/selection')
+  selectionUser() {
+    return this.userService.selection()
+  }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {
