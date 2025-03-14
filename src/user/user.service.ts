@@ -38,8 +38,29 @@ export class UserService {
 
     return await this.userRepository.find({ where });
   }
+
   async orderData() {
     return await this.userRepository.find({ where: {}, order: { id: "ASC" } })
+  }
+
+  async pagination(paginationDto: { page: number; limit: number }) {
+    let { page = 1, limit = 5 } = paginationDto;
+    if (page < 1) page = 1;
+    if (limit < 1) limit = 5;
+    const skip = (page - 1) * limit;
+    const [data, total] = await this.userRepository.findAndCount({
+      where: {},
+      order: { first_name: "ASC" },
+      take: limit,
+      skip,
+    });
+    return {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data,
+    };
   }
 
 

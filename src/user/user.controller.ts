@@ -30,6 +30,15 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('/pagination')
+  paginationUser(@Query() paginationDto: { page?: number; limit?: number }) {
+    return this.userService.pagination({
+      page: Number(paginationDto.page) || 1,
+      limit: Number(paginationDto.limit) || 5,
+    });
+  }
+
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
