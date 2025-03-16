@@ -1,14 +1,18 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserEntity } from './entities/user.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { Between, FindOptionsWhere, ILike, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { isEmail, isNumber } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ProfileEntity } from './entities/profile.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { ProfileDto } from './dto/profile.dto';
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) { }
+  constructor(
+    @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
+    @InjectRepository(ProfileEntity) private profileRepository: Repository<ProfileEntity>) { }
   async create(createDto: CreateUserDto) {
     const { first_name, last_name, email, age } = createDto
     const user = this.userRepository.create({
@@ -38,6 +42,10 @@ export class UserService {
     else if (endDate) where.created_at = LessThanOrEqual(new Date(endDate));
 
     return await this.userRepository.find({ where });
+  }
+
+  async blogsOfuser(userId: number) {
+    return await this.userRepository.findOne({ where: { id: userId }, relations: { blogs: true } })
   }
 
   async orderData() {
@@ -89,5 +97,34 @@ export class UserService {
     const user = await this.findOne(id)
     await this.userRepository.remove(user)
     return { message: "Data Remove Successfully" };
+  }
+
+  async createProfile(profileDto: ProfileDto) {
+    const { bio, photo, userId } = profileDto
+    const user = await this.userRepository.findOneBy({ id: userId })
+    if (user) {
+      const profile = await this.profileRepository.findOneBy({ userId })
+      if (profile) {
+        if (bio) profile.bio = bio
+        if (photo) profile.photo = photo
+        await this.profileRepository.save(profile)
+      } else {
+        let newProfile = this.profileRepository.create({ bio, photo, userId })
+        newProfile = await this.profileRepository.save(newProfile)
+        user.profileId = newProfile.id
+        await this.userRepository.save(user)
+      }
+      return { message: "Profile Created/Update Successfully" }
+    }
+    throw new NotFoundException()
+  }
+
+  async findUserWithProfile(id: number) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: { profile: true }
+    })
+    if (!user) throw new NotFoundException()
+    return user
   }
 }

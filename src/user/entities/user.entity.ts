@@ -1,4 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { ProfileEntity } from "./profile.entity";
+import { BlogEntity } from "src/blog/entities/blog.entity";
 
 @Entity("user")
 export class UserEntity {
@@ -12,6 +14,13 @@ export class UserEntity {
   email: string;
   @Column({ nullable: false })
   age: number;
+  @Column({ nullable: true })
+  profileId: number;
   @CreateDateColumn()
   created_at: Date
+  @OneToMany(() => BlogEntity, blog => blog.user, { onDelete: "CASCADE" })
+  blogs: BlogEntity[]
+  @OneToOne(() => ProfileEntity, profile => profile.user, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "profileId" })
+  profile: ProfileEntity
 }

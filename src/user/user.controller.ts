@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put, ParseIntPipe } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { ProfileDto } from './dto/profile.dto';
 
 @Controller('user')
 export class UserController {
@@ -11,9 +12,15 @@ export class UserController {
   create(@Body() createDto: CreateUserDto) {
     return this.userService.create(createDto);
   }
+
   @Post('/insert')
   insert(@Body() createDto: CreateUserDto) {
     return this.userService.insert(createDto);
+  }
+
+  @Post('/profile')
+  createProfile(@Body() profileDto: ProfileDto) {
+    return this.userService.createProfile(profileDto);
   }
 
   @Get()
@@ -23,6 +30,10 @@ export class UserController {
     @Query('endDate') endDate?: string,
   ) {
     return this.userService.findAll(search, startDate, endDate);
+  }
+  @Get('/blogs/:userId')
+  findAllBlogsOfUser(@Param("userId", ParseIntPipe) userId: number) {
+    return this.userService.blogsOfuser(userId);
   }
 
   @Get('/order')
@@ -41,6 +52,11 @@ export class UserController {
   @Get('/selection')
   selectionUser() {
     return this.userService.selection()
+  }
+
+  @Get('/profile/:id')
+  findUserWithProfile(@Param("id") id: string) {
+    return this.userService.findUserWithProfile(+id)
   }
 
   @Put(':id')
